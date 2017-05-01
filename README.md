@@ -14,3 +14,7 @@
 ```bash
 python /path/to/imagey/imagey/imagey.py [-j '<java options>'] /path/to/Fiji.app
 ```
+To start the CPython repl, navigate the Fiji menu to
+```
+Plugins > Scripting > CPython REPL
+```
