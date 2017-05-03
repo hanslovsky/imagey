@@ -45,51 +45,6 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.setGeometry( self.geometry_memory )
 
 
-def compile_class( javac, path, classpath, *javac_args ):
-	subprocess.call( ( javac, '-cp', classpath ) + javac_args + ( path, ) )
-	class_file = re.sub( 'java$', 'class', path )
-	return class_file
-
-def compile_command_class( javac, class_name, directory, classpath, *javac_args ):
-	code = """public class {class_name} implements org.scijava.command.Command
-{{
-
-	private static Runnable runnable;
-
-	public {class_name}()
-	{{
-
-	}}
-
-	public {class_name}( final Runnable runnable )
-	{{
-		super();
-		setRunnable( runnable );
-	}}
-
-	public static void setRunnable( final Runnable runnable )
-	{{
-		{class_name}.runnable = runnable;
-	}}
-
-	@Override
-	public void run()
-	{{
-		runnable.run();
-	}}
-
-}}
-""".format( class_name=class_name )
-	path = '{directory}/{class_name}.java'.format( directory=directory, class_name=class_name )
-	with open( path, 'w' ) as f:
-		f.write( code )
-
-	
-		
-	return compile_class( javac, path, classpath, *javac_args )
-
-
-
 if __name__ == "__main__":
 
 	import argparse
@@ -145,77 +100,18 @@ if __name__ == "__main__":
 	import imglyb
 	from imglyb import util
 	from jnius import autoclass, cast, PythonJavaClass, java_method
-	           
-	class ActionListener( PythonJavaClass ):
-	           
-		__javainterfaces__ = [ 'java/awt/event/ActionListener' ]
-		       
-		def __init__( self, func ):
-			super( ActionListener, self ).__init__()
-			self.func = func
-	           
-		@java_method('(Ljava/awt/event/ActionEvent;)V')
-		def actionPerformed( self, e ):
-			try:
-			    self.func( e )
-			except Exception as e:
-			    print (e)
-			    raise e
-	           
-	class WindowListener( PythonJavaClass ):
-	           
-		__javainterfaces__ = [ 'java/awt/event/WindowListener' ]
-	           
-		def __init__( self, func_dic ):
-			super( WindowListener, self ).__init__()
-			self.func_dict = func_dict
-	           
-		@java_method( '(Ljava/awt/event/WindowEvent;)V' )
-		def windowActivated( self, event ):
-			self.func_dict[ 'activated' ]( event )
-	           
-		@java_method( '(Ljava/awt/event/WindowEvent;)V' )
-		def windowClosed( self, event ):
-			self.func_dict[ 'closed' ]( event )
-	           
-		@java_method( '(Ljava/awt/event/WindowEvent;)V' )
-		def windowClosing( self, event ):
-			self.func_dict[ 'closing' ]( event )
-	           
-		@java_method( '(Ljava/awt/event/WindowEvent;)V' )
-		def windowDeactivated( self, event ):
-			self.func_dict[ 'deactivated' ]( event )
-	           
-		@java_method( '(Ljava/awt/event/WindowEvent;)V' )
-		def windowDeiconified( self, event ):
-			self.func_dict[ 'deiconified' ]( event )
-	           
-		@java_method( '(Ljava/awt/event/WindowEvent;)V' )
-		def windowIconified( self, event ):
-			self.func_dict[ 'iconified' ]( event )
-	           
-		@java_method( '(Ljava/awt/event/WindowEvent;)V' )
-		def windowOpened( self, event ):
-			self.func_dict[ 'opened' ]( event )
+	
+	class Command( PythonJavaClass ):
 
-			
-	class PythonRunnable( PythonJavaClass ):
-                                       
-		__javainterfaces__ = [ 'java/lang/Runnable' ]
-                                       
-		def __init__( self, command ): 
-			super( PythonRunnable, self ).__init__()
-			self.command = command     
-                                       
-		@java_method( '()V' )          
-		def run( self ):               
+		__javainterfaces__ = [ 'org/scijava/command/Command' ]
+
+		def __init__( self, command ):
+			super( Command, self ).__init__()
+			self.command = command
+
+		@java_method( '()V' )
+		def run( self ):
 			self.command()
-
-
-	def get_or_add_menu( root_menu, name ):
-		children_list = root_menu.getChildren()
-		children = [ children_list.get( i ) for i in range( children_list.size() ) if children_list.get( i ).getName() == name ]
-		return None if len( children ) == 0 else children[ 0 ]
 	           
 	           
 	kernel_manager = QtInProcessKernelManager()
@@ -231,23 +127,21 @@ if __name__ == "__main__":
 	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
-	compile_command_class( javac, class_name='ToggleQTConsoleWrapper', directory=pth, classpath=[ lib for lib in libs if re.search( 'scijava-common', lib ) ][ 0 ] )
-	PythonCommand = autoclass( 'ToggleQTConsoleWrapper' )
-	pr = PythonRunnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
-	PythonCommand().setRunnable( pr )
+	PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
+	command = Command( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
+	command_info = PythonCommandInfo( 'ToggleQTConsoleWrapper', command )
 
 	ImageJ = autoclass( 'ij.ImageJ' )
 	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
 	CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
 	MenuPath = autoclass( 'org.scijava.MenuPath' )
 
-
 	ij2 = ImageJ2()
 
-	command_info = CommandInfo( 'ToggleQTConsoleWrapper' ) # util.Helpers.className( dummy_command ) )
+	kernel.shell.push( {'ij2' : ij2 } )
+
 	command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
 	ij2.module().addModule( command_info )
-
 
 	ij2.launch()
 	           
