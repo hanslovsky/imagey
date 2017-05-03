@@ -1,6 +1,7 @@
 import glob
 import os
 import re
+import subprocess
 import sys
 import time
 
@@ -43,6 +44,52 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.raise_()
 		self.setGeometry( self.geometry_memory )
 
+
+def compile_class( javac, path, classpath, *javac_args ):
+	subprocess.call( ( javac, '-cp', classpath ) + javac_args + ( path, ) )
+	class_file = re.sub( 'java$', 'class', path )
+	return class_file
+
+def compile_command_class( javac, class_name, directory, classpath, *javac_args ):
+	code = """public class {class_name} implements org.scijava.command.Command
+{{
+
+	private static Runnable runnable;
+
+	public {class_name}()
+	{{
+
+	}}
+
+	public {class_name}( final Runnable runnable )
+	{{
+		super();
+		setRunnable( runnable );
+	}}
+
+	public static void setRunnable( final Runnable runnable )
+	{{
+		{class_name}.runnable = runnable;
+	}}
+
+	@Override
+	public void run()
+	{{
+		runnable.run();
+	}}
+
+}}
+""".format( class_name=class_name )
+	path = '{directory}/{class_name}.java'.format( directory=directory, class_name=class_name )
+	with open( path, 'w' ) as f:
+		f.write( code )
+
+	
+		
+	return compile_class( javac, path, classpath, *javac_args )
+
+
+
 if __name__ == "__main__":
 
 	import argparse
@@ -56,6 +103,14 @@ if __name__ == "__main__":
 	FIJI_JARS_DIR= '{}/jars'.format( args.fiji_dir[ 0 ] )
 	FIJI_PLUGIN_DIR = '{}/plugins'.format( args.fiji_dir[ 0 ] )
 	FIJI_JARS_BIOFORMATS_DIR = '{}/bio-formats'.format( FIJI_JARS_DIR )
+
+	try:
+		JAVA_HOME = os.environ[ 'JAVA_HOME' ]
+	except KeyError as e:
+		print( 'JAVA_HOME not in environment' )
+		raise e
+
+	javac = '{}/bin/javac'.format( JAVA_HOME )
 	           
 	match_string = r'(imglib2-([0-9]|algorithm-[0-9])|bigdataviewer|imagej-legacy)'
 	matcher = re.compile( match_string )
@@ -63,8 +118,14 @@ if __name__ == "__main__":
 	libs = [ jar for jar in sorted( glob.glob( '{}/*.jar'.format( FIJI_JARS_DIR ) ) ) if not matcher.search( jar ) ]
 	plugin_jars = [ jar for jar in sorted( glob.glob( '{}/*.jar'.format( FIJI_PLUGIN_DIR ) ) ) if not matcher.search( jar ) ]
 	bioformats_jars = [ jar for jar in sorted( glob.glob( '{}/*.jar'.format( FIJI_JARS_BIOFORMATS_DIR ) ) ) if not matcher.search( jar ) ]
+
+	
 	           
 	jars = libs + plugin_jars + bioformats_jars
+
+	pth = '/home/phil/local/tmp'
+	jars += [ pth ]
+
 	           
 	           
 	if 'CLASSPATH' in os.environ:
@@ -72,31 +133,14 @@ if __name__ == "__main__":
 	else:      
 		os.environ['CLASSPATH'] = ':'.join( jars )
 	           
-	os.environ['JVM_OPTIONS'] = '{} {}'.format( 
+	os.environ['JVM_OPTIONS'] = '{}{}'.format( 
 		' '.join( [ '-Dplugins.dir={}'.format( FIJI_PLUGIN_DIR ), '-Dpython.cachedir.skip=true' ] ),
-		args.java_opts
+		'' if len( args.java_opts ) == 0 else ' {}'.format( args.java_opts )
 		)
 
+	print ( "JVM OPTIONS", os.environ[ 'JVM_OPTIONS' ] )
+
 	ij_arguments = [] if len( args.ij_opts ) == 0 else args.ij_opts.split(' ')
-
-	
-	# import jnius_config
-	
-	# PYJNIUS_JAR_STR = 'PYJNIUS_JAR'
-
-	# try:
-	# 	PYJNIUS_JAR=os.environ[ PYJNIUS_JAR_STR ]
-	# except KeyError as e:
-	# 	print( "Path to pyjnius.jar not defined! Use environment variable {} to define it.".format( PYJNIUS_JAR_STR ) )
-	# 	raise e
-
-	# jnius_config.add_classpath( PYJNIUS_JAR )
-	# CLASSPATH_STR='CLASSPATH'
-	# if CLASSPATH_STR in os.environ:
-	# 	for path in os.environ[ CLASSPATH_STR ].split( jnius_config.split_char ):
-	# 		jnius_config.add_classpath( path )
-
-	# jnius_config.add_options( *os.environ[ 'JVM_OPTIONS' ].split(' ') )
 
 	import imglyb
 	from imglyb import util
@@ -156,67 +200,22 @@ if __name__ == "__main__":
 
 			
 	class PythonRunnable( PythonJavaClass ):
-
+                                       
 		__javainterfaces__ = [ 'java/lang/Runnable' ]
-
-		def __init__( self, command ):
+                                       
+		def __init__( self, command ): 
 			super( PythonRunnable, self ).__init__()
-			self.command = command
-
-		@java_method( '()V' )
-		def run( self ):
+			self.command = command     
+                                       
+		@java_method( '()V' )          
+		def run( self ):               
 			self.command()
 
-
-
-			
-	PythonCommand = autoclass( 'net.imglib2.python.PythonCommand' )
-	pr = PythonRunnable( lambda : print( "I am a command!" ) )
-	pr.run()
-	dummy_command = PythonCommand( pr )
-
-	# class PythonModuleInfo( PythonJavaClass ):
-	ImageJ = autoclass( 'ij.ImageJ' )
-	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
-	CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
-	MenuPath = autoclass( 'org.scijava.MenuPath' )
-	ij2 = ImageJ2()
-
-	# command_info = CommandInfo( cast( util.Helpers.className( dummy_command ), dummy_command ).getClass() )
-	print( 'cls name', util.Helpers.className( dummy_command) )
-	command_info = CommandInfo( 'net.imglib2.python.PythonCommand' ) # util.Helpers.className( dummy_command ) )
-	command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
-	ij2.module().addModule( command_info )
-	
-	ij2.launch()# ij_arguments )
 
 	def get_or_add_menu( root_menu, name ):
 		children_list = root_menu.getChildren()
 		children = [ children_list.get( i ) for i in range( children_list.size() ) if children_list.get( i ).getName() == name ]
 		return None if len( children ) == 0 else children[ 0 ]
-	
-	# Menu = autoclass( 'java.awt.Menu' )
-	# MenuItem = autoclass( 'java.awt.MenuItem' )
-	# ij = ImageJ()
-	# title = 'ImageY'
-	window_service = ij2.window()
-	main_menu = window_service.getMenuService().getMenu()
-	plugins_menu = get_or_add_menu( main_menu, 'Plugins' )
-	scripting_menu = get_or_add_menu( plugins_menu, 'Scripting' )
-	# print( scripting_menu.getMenuPath() )
-	
-	# ij.setTitle( title )
-	# menu_bar = ij.getMenuBar()
-	# menu_count = menu_bar.getMenuCount()
-	# menu_name = 'Plugins'
-	# scripting_name = 'Scripting'
-	# menus = [ menu_bar.getMenu( i ) for i in range( menu_count ) if menu_name == menu_bar.getMenu( i ).getLabel() ]
-	# menu = menus[ 0 ] if len( menus ) > 0 else menu_bar.add( Menu( menu_name ) )
-	# items = [ menu.getItem( i ) for i in range( menu.getItemCount() ) if scripting_name == menu.getItem( i ).getLabel() ]
-	# created = Menu( scripting_name )
-	           
-	# sub_menu = cast( 'java.awt.Menu', items[0] if len(items) > 0 else menu.add( cast( 'java.awt.MenuItem', Menu( scripting_name ) ) ) )
-	# cpython_entry = sub_menu.add( MenuItem( "CPython REPL" ) )
 	           
 	           
 	kernel_manager = QtInProcessKernelManager()
@@ -232,15 +231,25 @@ if __name__ == "__main__":
 	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
-	# listener = ActionListener( lambda e : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
-	# cpython_entry.addActionListener( listener )
-	           
-	# func_dict = defaultdict( lambda : lambda event : None )
-	# func_dict[ 'closed' ] = lambda event : app.quit()
-	           
-	# hook = WindowListener( func_dict )
-	           
-	# ij.addWindowListener( hook )
+	compile_command_class( javac, class_name='ToggleQTConsoleWrapper', directory=pth, classpath=[ lib for lib in libs if re.search( 'scijava-common', lib ) ][ 0 ] )
+	PythonCommand = autoclass( 'ToggleQTConsoleWrapper' )
+	pr = PythonRunnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
+	PythonCommand().setRunnable( pr )
+
+	ImageJ = autoclass( 'ij.ImageJ' )
+	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
+	CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
+	MenuPath = autoclass( 'org.scijava.MenuPath' )
+
+
+	ij2 = ImageJ2()
+
+	command_info = CommandInfo( 'ToggleQTConsoleWrapper' ) # util.Helpers.className( dummy_command ) )
+	command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
+	ij2.module().addModule( command_info )
+
+
+	ij2.launch()
 	           
 	app.exec_()
 
