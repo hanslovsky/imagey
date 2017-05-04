@@ -105,17 +105,17 @@ if __name__ == "__main__":
 	from imglyb import util
 	from jnius import autoclass, cast, PythonJavaClass, java_method
 	
-	class Command( PythonJavaClass ):
+	class Runnable( PythonJavaClass ):
 
-		__javainterfaces__ = [ 'org/scijava/command/Command' ]
+		__javainterfaces__ = [ 'java/lang/Runnable' ]
 
-		def __init__( self, command ):
-			super( Command, self ).__init__()
-			self.command = command
+		def __init__( self, r ):
+			super( Runnable, self ).__init__()
+			self.r = r
 
 		@java_method( '()V' )
 		def run( self ):
-			self.command()
+			self.r()
 	           
 	           
 	kernel_manager = QtInProcessKernelManager()
@@ -132,8 +132,10 @@ if __name__ == "__main__":
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
 	PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
-	command = Command( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
-	command_info = PythonCommandInfo( 'ToggleQTConsoleWrapper', command )
+	RunnableCommand = autoclass( 'net.imglib2.python.PythonCommandInfo$RunnableCommand' )
+	runnable = Runnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
+	command = RunnableCommand( runnable )
+	command_info = PythonCommandInfo( command )
 
 	ImageJ = autoclass( 'ij.ImageJ' )
 	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
@@ -146,6 +148,12 @@ if __name__ == "__main__":
 
 	command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
 	ij2.module().addModule( command_info )
+
+	# stupid_runnable = Runnable( lambda : print( "YUPUPUP" ) )
+	# stupid_command = RunnableCommand( stupid_runnable )
+	# stupid_command_info = PythonCommandInfo( stupid_command )
+	# stupid_command_info.setMenuPath( MenuPath( "STUPIDITY" ) )
+	# ij2.module().addModule( stupid_command_info )
 
 	ij2.launch()
 	           
