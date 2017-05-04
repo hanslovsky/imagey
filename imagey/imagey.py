@@ -30,19 +30,23 @@ class IPythonWidget( QtWidgets.QWidget ):
 			print( e )
 			raise e
 		self.geometry_memory = self.geometry()
+		self.was_hiding = False
 
 	def closeEvent( self, event ):
 		toggleShow = False
 		self.geometry_memory = self.geometry()
 		self.current_widget.hide()
 		self.hide()
+		self.was_hiding = True
 
 	def showEvent( self, event ):
 		self.setVisible( True )
 		self.current_widget.show()
 		self.activateWindow()
 		self.raise_()
-		self.setGeometry( self.geometry_memory )
+		if self.was_hiding:
+			self.setGeometry( self.geometry_memory )
+			self.was_hiding = False
 
 
 if __name__ == "__main__":
