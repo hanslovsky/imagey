@@ -81,11 +81,6 @@ if __name__ == "__main__":
 	
 	           
 	jars = libs + plugin_jars + bioformats_jars
-
-	pth = '/home/phil/local/tmp'
-	jars += [ pth ]
-
-	           
 	           
 	if 'CLASSPATH' in os.environ:
 		os.environ['CLASSPATH'] = ':'.join( jars + os.environ['CLASSPATH'].split(':') )
