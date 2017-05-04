@@ -1,4 +1,5 @@
 import glob
+import numpy as np
 import os
 import re
 import subprocess
@@ -12,17 +13,17 @@ from qtconsole.rich_ipython_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 
 class IPythonWidget( QtWidgets.QWidget ):
-	def __init__( self, parent, kernel_manager, kernel_client, kernel ):
+	def __init__( self, parent, kernel_manager, kernel_client, kernel, **reserved_variables ):
 		super( IPythonWidget, self ).__init__( parent )
 		self.layout = QtWidgets.QHBoxLayout( self )
 		self.kernel_manager = kernel_manager
 		self.kernel_client = kernel_client
 		self.kernel = kernel
+		self.reserved_variables = reserved_variables
 		self.current_widget = RichJupyterWidget( parent = self )
 		self.current_widget.kernel_manager = kernel_manager
 		self.layout.addWidget( self.current_widget )
-		ipython_widget = self.current_widget
-		self.kernel.shell.push({'widget':ipython_widget,'kernel':self.kernel, 'parent':self})
+		# self.kernel.shell.push({'widget':ipython_widget,'kernel':self.kernel, 'parent':self})
 		self.layout.setContentsMargins( 0, 0, 0, 0 )
 		try:
 			self.current_widget.kernel_client = kernel_client
@@ -40,6 +41,7 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.was_hiding = True
 
 	def showEvent( self, event ):
+		self.kernel.shell.push( self.reserved_variables )
 		self.setVisible( True )
 		self.current_widget.show()
 		self.activateWindow()
@@ -97,6 +99,8 @@ if __name__ == "__main__":
 	ij_arguments = [] if len( args.ij_opts ) == 0 else args.ij_opts.split(' ')
 
 	import imglyb
+	import jnius
+
 	from imglyb import util
 	from jnius import autoclass, cast, PythonJavaClass, java_method
 	
@@ -120,10 +124,15 @@ if __name__ == "__main__":
 	           
 	kernel_client = kernel_manager.client()
 	kernel_client.start_channels()
+
+	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
+	CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
+	MenuPath = autoclass( 'org.scijava.MenuPath' )
+	ij2 = ImageJ2()
 	           
 	app = QtWidgets.QApplication([])
 	app.setQuitOnLastWindowClosed( False )
-	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel )
+	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, ij=ij2, util=util, autoclass=autoclass, PythonJavaClass=PythonJavaClass, cast=cast, java_method=java_method )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
 	PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
@@ -131,15 +140,6 @@ if __name__ == "__main__":
 	runnable = Runnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
 	command = RunnableCommand( runnable )
 	command_info = PythonCommandInfo( command )
-
-	ImageJ = autoclass( 'ij.ImageJ' )
-	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
-	CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
-	MenuPath = autoclass( 'org.scijava.MenuPath' )
-
-	ij2 = ImageJ2()
-
-	kernel.shell.push( {'ij2' : ij2 } )
 
 	command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
 	ij2.module().addModule( command_info )
