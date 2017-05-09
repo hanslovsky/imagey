@@ -21,6 +21,7 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.kernel = kernel
 		self.reserved_variables = reserved_variables
 		self.current_widget = RichJupyterWidget( parent = self )
+		self.reserved_variables[ 'widget' ] = self.current_widget
 		self.current_widget.kernel_manager = kernel_manager
 		self.layout.addWidget( self.current_widget )
 		# self.kernel.shell.push({'widget':ipython_widget,'kernel':self.kernel, 'parent':self})
