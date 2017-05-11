@@ -1,8 +1,8 @@
 # imagey - ImageJ with CPython REPL
 
-Note that this requires the imagey branch of imglyb, currently.
+This uses ImageJ2 because shared memory would not be possible with ImageJ1 `ImageProcessor` data structures.
 
-![Matplotlib inline plot from ImagePlus](https://gist.githubusercontent.com/hanslovsky/4e0ec6dbb64d01186ac7f9f2a942257c/raw/79d7789172afb128ca913b207e89b59e04291814/imagej-qtconsole.png)
+![Matplotlib inline plot from ImagePlus](https://gist.githubusercontent.com/hanslovsky/4e0ec6dbb64d01186ac7f9f2a942257c/raw/f8f97fa0981503815b195efd8f64874228eda992/imagey.png)
 
 ![IPython code completion](https://gist.githubusercontent.com/hanslovsky/4e0ec6dbb64d01186ac7f9f2a942257c/raw/79d7789172afb128ca913b207e89b59e04291814/imagej-qtconsole-autocomplete.png)
 
