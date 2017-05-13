@@ -102,7 +102,7 @@ if __name__ == "__main__":
 	import imglyb
 	import jnius_config
 
-	from imglyb import util
+	from imglyb import util, types
 	from jnius import autoclass, cast, PythonJavaClass, java_method
 	
 	class Runnable( PythonJavaClass ):
