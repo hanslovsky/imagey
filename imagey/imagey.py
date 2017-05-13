@@ -21,7 +21,7 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.kernel = kernel
 		self.reserved_variables = reserved_variables
 		self.current_widget = RichJupyterWidget( parent = self )
-		self.reserved_variables[ 'widget' ] = self.current_widget
+		self.reserved_variables[ 'change_font_size' ] = self.current_widget.change_font_size
 		self.current_widget.kernel_manager = kernel_manager
 		self.current_widget.change_font_size( 7 )
 		self.layout.addWidget( self.current_widget )
