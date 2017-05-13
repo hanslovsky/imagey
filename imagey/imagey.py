@@ -133,7 +133,7 @@ if __name__ == "__main__":
 	           
 	app = QtWidgets.QApplication([])
 	app.setQuitOnLastWindowClosed( False )
-	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, ij=ij2, util=util, autoclass=autoclass, PythonJavaClass=PythonJavaClass, cast=cast, java_method=java_method, np=np, jnius_config=jnius_config )
+	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, ij=ij2, util=util, autoclass=autoclass, PythonJavaClass=PythonJavaClass, cast=cast, java_method=java_method, np=np, jnius_config=jnius_config, imglyb=imglyb, types=types )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
 	PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
