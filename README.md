@@ -19,6 +19,10 @@ This uses ImageJ2 because shared memory would not be possible with ImageJ1 `Imag
 ```bash
 python /path/to/imagey/imagey/imagey.py [-j '<java options>'] /path/to/Fiji.app
 ```
+Switch to modern mode:
+```
+Help>Switch to Modern Mode
+```
 To start the CPython repl, navigate the Fiji menu to
 ```
 Plugins>Scripting>CPython REPL
