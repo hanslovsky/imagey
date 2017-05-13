@@ -21,11 +21,10 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.kernel = kernel
 		self.reserved_variables = reserved_variables
 		self.current_widget = RichJupyterWidget( parent = self )
-		self.reserved_variables[ 'change_font_size' ] = self.current_widget.change_font_size
 		self.current_widget.kernel_manager = kernel_manager
 		self.layout.addWidget( self.current_widget )
-		# self.kernel.shell.push({'widget':ipython_widget,'kernel':self.kernel, 'parent':self})
 		self.layout.setContentsMargins( 0, 0, 0, 0 )
+
 		try:
 			self.current_widget.kernel_client = kernel_client
 		except Exception as e:
@@ -33,6 +32,8 @@ class IPythonWidget( QtWidgets.QWidget ):
 			raise e
 		self.geometry_memory = self.geometry()
 		self.was_hiding = False
+
+		self.kernel.shell.push( self.reserved_variables )
 
 	def closeEvent( self, event ):
 		toggleShow = False
@@ -50,6 +51,7 @@ class IPythonWidget( QtWidgets.QWidget ):
 		if self.was_hiding:
 			self.setGeometry( self.geometry_memory )
 			self.was_hiding = False
+
 
 
 if __name__ == "__main__":
