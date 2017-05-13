@@ -21,9 +21,8 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.kernel = kernel
 		self.reserved_variables = reserved_variables
 		self.current_widget = RichJupyterWidget( parent = self )
-		self.reserved_variables[ 'widget' ] = self.current_widget
+		self.reserved_variables[ 'change_font_size' ] = self.current_widget.change_font_size
 		self.current_widget.kernel_manager = kernel_manager
-		self.current_widget.change_font_size( 7 )
 		self.layout.addWidget( self.current_widget )
 		# self.kernel.shell.push({'widget':ipython_widget,'kernel':self.kernel, 'parent':self})
 		self.layout.setContentsMargins( 0, 0, 0, 0 )
@@ -103,7 +102,7 @@ if __name__ == "__main__":
 	import imglyb
 	import jnius_config
 
-	from imglyb import util
+	from imglyb import util, types
 	from jnius import autoclass, cast, PythonJavaClass, java_method
 	
 	class Runnable( PythonJavaClass ):
@@ -134,7 +133,7 @@ if __name__ == "__main__":
 	           
 	app = QtWidgets.QApplication([])
 	app.setQuitOnLastWindowClosed( False )
-	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, ij=ij2, util=util, autoclass=autoclass, PythonJavaClass=PythonJavaClass, cast=cast, java_method=java_method, np=np, jnius_config=jnius_config )
+	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, ij=ij2, util=util, autoclass=autoclass, PythonJavaClass=PythonJavaClass, cast=cast, java_method=java_method, np=np, jnius_config=jnius_config, imglyb=imglyb, types=types )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
 	PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
