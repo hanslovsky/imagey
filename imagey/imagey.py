@@ -186,11 +186,49 @@ if __name__ == "__main__":
 	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
 	CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
 	MenuPath = autoclass( 'org.scijava.MenuPath' )
-	ij2 = ImageJ2()
+	ij = ImageJ2()
+
+	Factory = autoclass( 'net/imglib2/python/ArrayImgWithUnsafeStoreFactory'.replace( '/', '.' ) )
+	factory = cast( 'net.imglib2.img.ImgFactory', Factory() )
+	ImgOpener = autoclass( 'io.scif.img.ImgOpener' )
+	opener = ImgOpener( ij.getContext() )
+	display = ij.display()
+
+
+	def open_imgs( path ):
+		return opener.openImg( path, factory )
+
+	def open_img( path ):
+		return open_imgs( path ).get( 0 )
+
+	def show_img( img, title ):
+		return display.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
+
 	           
 	app = QtWidgets.QApplication([])
 	app.setQuitOnLastWindowClosed( False )
-	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, ij=ij2, util=util, autoclass=autoclass, PythonJavaClass=PythonJavaClass, cast=cast, java_method=java_method, np=np, jnius_config=jnius_config, imglyb=imglyb, types=types )
+
+	
+	reserved_variables = dict (
+		ij=ij,
+		factory=factory,
+		opener=opener,
+		display=display,
+		open_imgs=open_imgs,
+		open_img = open_img,
+		show_img = show_img,
+		np=np,
+		imglyb=imglyb,
+		util=util,
+		types=types,
+		autoclass=autoclass,
+		cast=cast,
+		java_method=java_method,
+		PythonJavaClass=PythonJavaClass,
+		jnius_config=jnius_config
+		)
+
+	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, **reserved_variables )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
 	PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
@@ -200,15 +238,15 @@ if __name__ == "__main__":
 	command_info = PythonCommandInfo( command )
 
 	command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
-	ij2.module().addModule( command_info )
+	ij.module().addModule( command_info )
 
 	# stupid_runnable = Runnable( lambda : print( "YUPUPUP" ) )
 	# stupid_command = RunnableCommand( stupid_runnable )
 	# stupid_command_info = PythonCommandInfo( stupid_command )
 	# stupid_command_info.setMenuPath( MenuPath( "STUPIDITY" ) )
-	# ij2.module().addModule( stupid_command_info )
+	# ij.module().addModule( stupid_command_info )
 
-	ij2.launch()
+	ij.launch()
 	           
 	app.exec_()
 
