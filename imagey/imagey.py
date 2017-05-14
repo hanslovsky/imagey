@@ -196,12 +196,35 @@ if __name__ == "__main__":
 
 
 	def open_imgs( path ):
+		"""Open all images at location specified by path.
+
+		Parameters
+		----------
+		path : str
+			Location of images.
+		"""
 		return opener.openImgs( path, factory )
 
 	def open_img( path ):
+		"""Open one image at location specified by path.
+
+		Parameters
+		----------
+		path : str
+			Location of image.
+		"""
 		return open_imgs( path ).get( 0 )
 
 	def show_img( img, title ):
+		"""Show image using DisplayService of current ImageJ instance.
+
+		Parameters
+		----------
+		img : numpy.ndarray or net.imglib2.RandomAccessibleInterval
+			Image to be displayed.
+		title : str
+			Title of display.
+		"""
 		return display.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
 
 	           
