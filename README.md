@@ -42,3 +42,12 @@ For conevenience, these variables are exposed to the IPython interpretor:
 | `java_method`     | `jnius.java_method`              |
 | `PythonJavaClass` | `jnius.PythonJavaClass`          |
 | `jnius_config`    | config module for `jnius`        |
+
+These keyboard shortcuts are available:
+
+| Shortcut | Action                   |
+| -------- | ------------------------ |
+| C-+      | Increase font size       |
+| C--      | Decrease font size       |
+| C-0      | Reset font size          |
+| C-p      | Reload initial variables |
