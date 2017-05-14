@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
 
 	def open_imgs( path ):
-		return opener.openImg( path, factory )
+		return opener.openImgs( path, factory )
 
 	def open_img( path ):
 		return open_imgs( path ).get( 0 )
