@@ -12,6 +12,52 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from qtconsole.rich_ipython_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 
+class ResetVariablesDialog( QtWidgets.QWidget ):
+	def __init__( self, parent, kernel, **variables ):
+		super( ResetVariablesDialog, self ).__init__( parent )
+		self.kernel = kernel
+		self.variables = variables
+
+		self.layout = QtWidgets.QGridLayout()
+
+		self.checkbox_group = QtWidgets.QGroupBox( 'Reset variables' )
+		self.checkbox_layout = QtWidgets.QGridLayout()
+		self.checkbox_group.setFlat( True )
+
+		num_rows = int( np.floor( np.sqrt( len( variables ) ) ) )
+		num_cols = int( np.floor( len( variables ) * 1.0 / num_rows ) ) # Why floor?
+
+		self.checkboxes = [ QtWidgets.QCheckBox( k ) for k, v in self.variables.items() ]
+		for idx, box in enumerate( self.checkboxes ):
+			box.setChecked( True )
+			self.checkbox_layout.addWidget( box, idx / num_rows, idx % num_cols )
+
+		self.checkbox_group.setLayout( self.checkbox_layout )
+		self.layout.addWidget( self.checkbox_group, 0, 0 )
+
+		self.button_group = QtWidgets.QGroupBox( '' )
+		self.button_layout = QtWidgets.QHBoxLayout()
+		self.button_group.setFlat( True )
+
+		self.ok_button = QtWidgets.QPushButton( "&Push selection" )
+		def push_variables_and_close( kernel, variables, checkboxes ):
+			pushable_variables = {
+				box.text().replace( '&', '' ) : variables[ box.text().replace( '&', '' ) ] for box in checkboxes if box.isChecked()
+				}
+			kernel.shell.push( pushable_variables )
+			self.close()
+		self.ok_button.clicked.connect( lambda : push_variables_and_close( self.kernel, self.variables, self.checkboxes ) )
+
+		self.cancel_button = QtWidgets.QPushButton( "&Cancel" )
+		self.cancel_button.clicked.connect( self.close )
+
+		self.button_layout.addWidget( self.ok_button )
+		self.button_layout.addWidget( self.cancel_button )
+		self.button_group.setLayout( self.button_layout )
+		self.layout.addWidget( self.button_group, 1, 0 )
+
+		self.setLayout( self.layout )
+
 class IPythonWidget( QtWidgets.QWidget ):
 	def __init__( self, parent, kernel_manager, kernel_client, kernel, **reserved_variables ):
 		super( IPythonWidget, self ).__init__( parent )
@@ -34,6 +80,15 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.was_hiding = False
 
 		self.kernel.shell.push( self.reserved_variables )
+
+		self.push_action = QtWidgets.QAction(
+			"Push variables",
+			self,
+			shortcut="Ctrl+p",
+			shortcutContext=QtCore.Qt.WidgetWithChildrenShortcut,
+			statusTip="Restore the Normal font size",
+			triggered=lambda : ResetVariablesDialog( None, self.kernel, **self.reserved_variables ).show() )
+		self.addAction( self.push_action )
 
 	def closeEvent( self, event ):
 		toggleShow = False
