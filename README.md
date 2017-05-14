@@ -30,18 +30,24 @@ Plugins>Scripting>CPython REPL
 
 For conevenience, these variables are exposed to the IPython interpretor:
 
-| Variable          | Description                      |
-| ----------------- | -------------------------------- |
-| `ij`              | Reference to the ImageJ instance |
-| `imglyb`          | `imglib2-imglyb` module          |
-| `util`            | `imglyb.util`                    |
-| `types`           | `imglyb.types`                   |
-| `np`              | `numpy` package                  |
-| `autoclass`       | `jnius.autoclass`                |
-| `cast`            | `jnius.cast`                     |
-| `java_method`     | `jnius.java_method`              |
-| `PythonJavaClass` | `jnius.PythonJavaClass`          |
-| `jnius_config`    | config module for `jnius`        |
+| Variable          | Description                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| `ij`              | `ImageJ` instance                                                                           |
+| `factory`         | `ImgFactory` instance for numpy convertibale `Img`                                          |
+| `opener`          | `ImgOpener` instance                                                                        |
+| `display`         | `DisplayService` used by active `ImageJ` instance                                           |
+| `open_imgs`       | Open all images at path through `ImgOpener`                                                 |
+| `open_img`        | Open image at path through `ImgOpener`                                                      |
+| `show_img`        | Show image (`numpy` or `imglib2`) through `DisplayService` used by active `ImageJ` instance |
+| `imglyb`          | `imglib2-imglyb` module                                                                     |
+| `util`            | `imglyb.util`                                                                               |
+| `types`           | `imglyb.types`                                                                              |
+| `np`              | `numpy` package                                                                             |
+| `autoclass`       | `jnius.autoclass`                                                                           |
+| `cast`            | `jnius.cast`                                                                                |
+| `java_method`     | `jnius.java_method`                                                                         |
+| `PythonJavaClass` | `jnius.PythonJavaClass`                                                                     |
+| `jnius_config`    | config module for `jnius`                                                                   |
 
 These keyboard shortcuts are available:
 
