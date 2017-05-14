@@ -27,3 +27,18 @@ To start the CPython repl, navigate the Fiji menu to
 ```
 Plugins>Scripting>CPython REPL
 ```
+
+For conevenience, these variables are exposed to the IPython interpretor:
+
+| Variable          | Description                      |
+| ----------------- | -------------------------------- |
+| `ij`              | Reference to the ImageJ instance |
+| `imglyb`          | `imglib2-imglyb` module          |
+| `util`            | `imglyb.util`                    |
+| `types`           | `imglyb.types`                   |
+| `np`              | `numpy` package                  |
+| `autoclass`       | `jnius.autoclass`                |
+| `cast`            | `jnius.cast`                     |
+| `java_method`     | `jnius.java_method`              |
+| `PythonJavaClass` | `jnius.PythonJavaClass`          |
+| `jnius_config`    | config module for `jnius`        |
