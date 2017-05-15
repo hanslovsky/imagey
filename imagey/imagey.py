@@ -118,6 +118,8 @@ if __name__ == "__main__":
 	parser.add_argument( '--ij-opts', '-i', required=False, default='' )
 
 	args = parser.parse_args()
+
+	from jnius_config import split_char
 	
 	FIJI_JARS_DIR= '{}/jars'.format( args.fiji_dir[ 0 ] )
 	FIJI_PLUGIN_DIR = '{}/plugins'.format( args.fiji_dir[ 0 ] )
@@ -143,9 +145,9 @@ if __name__ == "__main__":
 	jars = libs + plugin_jars + bioformats_jars
 	           
 	if 'CLASSPATH' in os.environ:
-		os.environ['CLASSPATH'] = ':'.join( jars + os.environ['CLASSPATH'].split(':') )
+		os.environ['CLASSPATH'] = split_char.join( jars + os.environ['CLASSPATH'].split( split_char ) )
 	else:      
-		os.environ['CLASSPATH'] = ':'.join( jars )
+		os.environ['CLASSPATH'] = split_char.join( jars )
 	           
 	os.environ['JVM_OPTIONS'] = '{}{}'.format( 
 		' '.join( [ '-Dplugins.dir={}'.format( FIJI_PLUGIN_DIR ), '-Dpython.cachedir.skip=true' ] ),
