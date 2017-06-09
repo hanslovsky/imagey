@@ -271,7 +271,12 @@ if __name__ == "__main__":
 	# stupid_command_info.setMenuPath( MenuPath( "STUPIDITY" ) )
 	# ij.module().addModule( stupid_command_info )
 
-	ij.launch()
-	           
+	def run_on_start():
+		print( 'single shot in event loop' )
+		ij.launch()
+
+	QtCore.QTimer.singleShot( 0, run_on_start )
+
+	print ( "Entering qt event loop" )
 	app.exec_()
 
