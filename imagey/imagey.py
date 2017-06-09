@@ -185,18 +185,6 @@ if __name__ == "__main__":
 	kernel_client = kernel_manager.client()
 	kernel_client.start_channels()
 
-	ImageJ2 = autoclass( 'net.imagej.ImageJ' )
-	CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
-	MenuPath = autoclass( 'org.scijava.MenuPath' )
-	ij = ImageJ2()
-
-	Factory = autoclass( 'net/imglib2/python/ArrayImgWithUnsafeStoreFactory'.replace( '/', '.' ) )
-	factory = cast( 'net.imglib2.img.ImgFactory', Factory() )
-	ImgOpener = autoclass( 'io.scif.img.ImgOpener' )
-	opener = ImgOpener( ij.getContext() )
-	display = ij.display()
-
-
 	def open_imgs( path ):
 		"""Open all images at location specified by path.
 
@@ -205,7 +193,7 @@ if __name__ == "__main__":
 		path : str
 			Location of images.
 		"""
-		return opener.openImgs( path, factory )
+		return None # opener.openImgs( path, factory )
 
 	def open_img( path ):
 		"""Open one image at location specified by path.
@@ -215,7 +203,7 @@ if __name__ == "__main__":
 		path : str
 			Location of image.
 		"""
-		return open_imgs( path ).get( 0 )
+		return None # RuntimeError: the PyQt5.QtCore and PyQt4.QtCore modules both wrap the QObject classopen_imgs( path ).get( 0 )
 
 	def show_img( img, title ):
 		"""Show image using DisplayService of current ImageJ instance.
@@ -227,7 +215,7 @@ if __name__ == "__main__":
 		title : str
 			Title of display.
 		"""
-		return display.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
+		return None # RuntimeError: the PyQt5.QtCore and PyQt4.QtCore modules both wrap the QObject classdisplay.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
 
 	           
 	app = QtWidgets.QApplication([])
@@ -235,13 +223,13 @@ if __name__ == "__main__":
 
 	
 	reserved_variables = dict (
-		ij=ij,
-		factory=factory,
-		opener=opener,
-		display=display,
-		open_imgs=open_imgs,
-		open_img=open_img,
-		show_img=show_img,
+		# ij=ij,
+		# factory=factory,
+		# opener=opener,
+		# display=display,
+		# open_imgs=open_imgs,
+		# open_img=open_img,
+		# show_img=show_img,
 		np=np,
 		imglyb=imglyb,
 		util=util,
@@ -256,14 +244,7 @@ if __name__ == "__main__":
 	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, **reserved_variables )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
-	PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
-	RunnableCommand = autoclass( 'net.imglib2.python.PythonCommandInfo$RunnableCommand' )
-	runnable = Runnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
-	command = RunnableCommand( runnable )
-	command_info = PythonCommandInfo( command )
-
-	command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
-	ij.module().addModule( command_info )
+	
 
 	# stupid_runnable = Runnable( lambda : print( "YUPUPUP" ) )
 	# stupid_command = RunnableCommand( stupid_runnable )
@@ -273,7 +254,28 @@ if __name__ == "__main__":
 
 	def run_on_start():
 		print( 'single shot in event loop' )
+		ImageJ2 = autoclass( 'net.imagej.ImageJ' )
+		CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
+		MenuPath = autoclass( 'org.scijava.MenuPath' )
+		ij = ImageJ2()
+
+		Factory = autoclass( 'net/imglib2/python/ArrayImgWithUnsafeStoreFactory'.replace( '/', '.' ) )
+		factory = cast( 'net.imglib2.img.ImgFactory', Factory() )
+		ImgOpener = autoclass( 'io.scif.img.ImgOpener' )
+		opener = ImgOpener( ij.getContext() )
+		display = ij.display()
+
+		PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
+		RunnableCommand = autoclass( 'net.imglib2.python.PythonCommandInfo$RunnableCommand' )
+		runnable = Runnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
+		command = RunnableCommand( runnable )
+		command_info = PythonCommandInfo( command )
+
+		command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
+		ij.module().addModule( command_info )
+
 		ij.launch()
+		
 
 	QtCore.QTimer.singleShot( 0, run_on_start )
 
