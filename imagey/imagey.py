@@ -98,7 +98,7 @@ class IPythonWidget( QtWidgets.QWidget ):
 		self.was_hiding = True
 
 	def showEvent( self, event ):
-		self.kernel.shell.push( self.reserved_variables )
+		# self.kernel.shell.push( self.reserved_variables )
 		self.setVisible( True )
 		self.current_widget.show()
 		self.activateWindow()
@@ -106,6 +106,10 @@ class IPythonWidget( QtWidgets.QWidget ):
 		if self.was_hiding:
 			self.setGeometry( self.geometry_memory )
 			self.was_hiding = False
+
+	def add_more_variables( self,  **variables ):
+		self.reserved_variables.update( variables )
+		self.kernel.shell.push( variables )
 
 
 
@@ -185,51 +189,12 @@ if __name__ == "__main__":
 	kernel_client = kernel_manager.client()
 	kernel_client.start_channels()
 
-	def open_imgs( path ):
-		"""Open all images at location specified by path.
-
-		Parameters
-		----------
-		path : str
-			Location of images.
-		"""
-		return None # opener.openImgs( path, factory )
-
-	def open_img( path ):
-		"""Open one image at location specified by path.
-
-		Parameters
-		----------
-		path : str
-			Location of image.
-		"""
-		return None # RuntimeError: the PyQt5.QtCore and PyQt4.QtCore modules both wrap the QObject classopen_imgs( path ).get( 0 )
-
-	def show_img( img, title ):
-		"""Show image using DisplayService of current ImageJ instance.
-
-		Parameters
-		----------
-		img : numpy.ndarray or net.imglib2.RandomAccessibleInterval
-			Image to be displayed.
-		title : str
-			Title of display.
-		"""
-		return None # RuntimeError: the PyQt5.QtCore and PyQt4.QtCore modules both wrap the QObject classdisplay.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
-
 	           
 	app = QtWidgets.QApplication([])
 	app.setQuitOnLastWindowClosed( False )
 
 	
 	reserved_variables = dict (
-		# ij=ij,
-		# factory=factory,
-		# opener=opener,
-		# display=display,
-		# open_imgs=open_imgs,
-		# open_img=open_img,
-		# show_img=show_img,
 		np=np,
 		imglyb=imglyb,
 		util=util,
@@ -244,14 +209,6 @@ if __name__ == "__main__":
 	widget = IPythonWidget( None, kernel_manager, kernel_client, kernel, **reserved_variables )
 	widget.setWindowTitle( "IPYTHOOOOON" )
 	           
-	
-
-	# stupid_runnable = Runnable( lambda : print( "YUPUPUP" ) )
-	# stupid_command = RunnableCommand( stupid_runnable )
-	# stupid_command_info = PythonCommandInfo( stupid_command )
-	# stupid_command_info.setMenuPath( MenuPath( "STUPIDITY" ) )
-	# ij.module().addModule( stupid_command_info )
-
 	def run_on_start():
 		print( 'single shot in event loop' )
 		ImageJ2 = autoclass( 'net.imagej.ImageJ' )
@@ -273,6 +230,42 @@ if __name__ == "__main__":
 
 		command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
 		ij.module().addModule( command_info )
+
+
+
+		def open_imgs( path ):
+			"""Open all images at location specified by path.
+
+			Parameters
+			----------
+			path : str
+			Location of images.
+			"""
+			return opener.openImgs( path, factory )
+
+		def open_img( path ):
+			"""Open one image at location specified by path.
+
+			Parameters
+			----------
+			path : str
+			Location of image.
+			"""
+			return open_imgs( path ).get( 0 )
+
+		def show_img( img, title='' ):
+			"""Show image using DisplayService of current ImageJ instance.
+
+			Parameters
+			----------
+			img : numpy.ndarray or net.imglib2.RandomAccessibleInterval
+			Image to be displayed.
+			title : str
+			Title of display.
+			"""
+			return display.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
+
+		widget.add_more_variables( ij=ij, factory=factory, opener=opener, display=display, open_imgs=open_imgs, open_img=open_img, show_img=show_img )
 
 		ij.launch()
 		
