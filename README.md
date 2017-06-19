@@ -14,6 +14,9 @@ This uses ImageJ2 because shared memory would not be possible with ImageJ1 `Imag
  - [QtConsole](https://github.com/jupyter/qtconsole)
    - Install through your package manager, or
    - `pip install qtconsole`
+ - [Fiji](https://fiji.sc)
+   - Download Fiji and run `Update...`
+   - Add (http://sites.imagej.net/Hanslovsky/) to update sites and update `scifio.jar`.
 
 ## Run
 ```bash
