@@ -274,7 +274,10 @@ if __name__ == "__main__":
 		widget.add_more_variables( ij=ij, factory=factory, opener=opener, display=display, open_imgs=open_imgs, open_img=open_img, show_img=show_img )
 
 		ij.launch()
-		
+
+		ui = ij.ui()
+		while ui.isVisible():
+			time.sleep( 0.01 )
 
 	QtCore.QTimer.singleShot( 0, run_on_start )
 
