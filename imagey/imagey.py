@@ -115,9 +115,15 @@ class IPythonWidget( QtWidgets.QWidget ):
 
 if __name__ == "__main__":
 
+	FIJI_APP_DIR='FIJI_APP_DIR'
+
 	import argparse
 	parser = argparse.ArgumentParser()
-	parser.add_argument( 'fiji_dir', metavar='FIJI_DIR', nargs=1, help='Fiji app directory containings plugins and jars directories.' )
+	if FIJI_APP_DIR in os.environ:
+		parser.add_argument( '--fiji-dir', '-f', required=False, default=os.environ[ FIJI_APP_DIR ], help='Fiji app directory containings plugins and jars directories.' )
+
+	else:
+		parser.add_argument( 'fiji_dir', metavar='FIJI_DIR', nargs=1, help='Fiji app directory containings plugins and jars directories.' )
 	parser.add_argument( '--java-opts', '-j', required=False, default='' )
 	parser.add_argument( '--ij-opts', '-i', required=False, default='' )
 
