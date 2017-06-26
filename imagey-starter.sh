@@ -80,11 +80,7 @@ JARS_FMT="${JARS_DIR}/*.jar"
 PLUGINS_FMT="${PLUGINS_DIR}/*.jar"
 BIO_FORMATS_FMT="${BIO_FORMATS_DIR}/*.jar"
 
-export CLASSPATH=`ls -1 ${JARS_FMT} ${PLUGINS_FMT} ${BIO_FORMATS_FMT} | tr '\n' ':'`
-# echo $CLASSPATH | tr ':' '\n'
-export IMGLYB_JAR=`ls -1 ${JARS_DIR}/imglib2-imglyb*.jar | head -n1`
-# echo $IMGLYB_JAR
-
+export CLASSPATH=`ls -1 ${JARS_FMT} ${PLUGINS_FMT} ${BIO_FORMATS_FMT} | tr '\n' ':'`:$CLASSPATH
 
 $PYTHON "${FIJI_APP_DIR}/imagey.py" "$@"
 
