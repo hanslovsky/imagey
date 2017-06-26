@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 
 from collections import defaultdict
@@ -276,8 +277,12 @@ if __name__ == "__main__":
 		ij.launch()
 
 		ui = ij.ui()
-		while ui.isVisible():
-			time.sleep( 0.01 )
+		def sleeper():
+			while ui.isVisible():
+				time.sleep( 0.1 )
+
+		t = threading.Thread( target=sleeper )
+		t.start()
 
 	QtCore.QTimer.singleShot( 0, run_on_start )
 
