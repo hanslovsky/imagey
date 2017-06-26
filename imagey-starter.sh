@@ -30,9 +30,9 @@ if [ -z "${USE_SYSTEM_PYTHON}" ]; then
                 exit 1
         esac
         CONDA_INSTALLER="${FIJI_APP_DIR}/${INSTALLER_NAME}"
-        wget \
+        curl \
             https://repo.continuum.io/miniconda/${INSTALLER_NAME} \
-            -O ${CONDA_INSTALLER}
+            -o ${CONDA_INSTALLER}
         sh "${CONDA_INSTALLER}" -b -p $CONDA_HOME
         rm "${CONDA_INSTALLER}"
     fi
