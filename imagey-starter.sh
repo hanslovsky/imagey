@@ -55,19 +55,25 @@ if [ -z "${USE_SYSTEM_PYTHON}" ]; then
         CREATE_CMD="${CONDA_CMD} create \
               -y \
               -n ${FIJI_CONDA_ENVIRONMENT} \
-              -c hanslovsky \
-              python=3.6 \
-              imglib2-imglyb \
-              pyqt \
-              qtconsole \
-              scikit-image \
-              matplotlib"
+              python=3.6"
         ${CREATE_CMD}
     fi
 
     # recommended by conda installation instructions to source activate first:
     # https://conda.io/docs/help/silent.html#linux-and-os-x
     source "${ACTIVATE}" "${FIJI_CONDA_ENVIRONMENT}"
+
+    INSTALLED_PACKAGES="$($CONDA_CMD list | grep -v '^#' | cut -d ' ' -f1)"
+    if [ -z "$(echo $INSTALLED_PACKAGES | grep imglib2-imglyb)" ]; then
+        $CONDA_CMD install -y -c hanslovsky imglib2-imglyb
+    fi
+
+    for CONDA_PACKAGE in pyqt qtconsole scikit-image matplotlib; do
+        if [ -z "$(echo $INSTALLED_PACKAGES | grep $CONDA_PACKAGE)" ]; then
+            $CONDA_CMD install -y $CONDA_PACKAGE
+        fi
+    done
+
     export JAVA_HOME="${USER_JAVA_HOME:-$JAVA_HOME}"
 
 fi
