@@ -218,22 +218,22 @@ if __name__ == "__main__":
 	           
 	def run_on_start():
 		print( 'single shot in event loop' )
-		ImageJ2 = autoclass( 'net.imagej.ImageJ' )
+		ImageJ2     = autoclass( 'net.imagej.ImageJ' )
 		CommandInfo = autoclass( 'org.scijava.command.CommandInfo' )
-		MenuPath = autoclass( 'org.scijava.MenuPath' )
-		ij = ImageJ2()
+		MenuPath    = autoclass( 'org.scijava.MenuPath' )
+		ij          = ImageJ2()
 
-		Factory = autoclass( 'net/imglib2/python/ArrayImgWithUnsafeStoreFactory'.replace( '/', '.' ) )
-		factory = cast( 'net.imglib2.img.ImgFactory', Factory() )
+		Factory   = autoclass( 'net/imglib2/python/ArrayImgWithUnsafeStoreFactory'.replace( '/', '.' ) )
+		factory   = cast( 'net.imglib2.img.ImgFactory', Factory() )
 		ImgOpener = autoclass( 'io.scif.img.ImgOpener' )
-		opener = ImgOpener( ij.getContext() )
-		display = ij.display()
+		opener    = ImgOpener( ij.getContext() )
+		display   = ij.display()
 
 		PythonCommandInfo = autoclass( 'net.imglib2.python.PythonCommandInfo' )
-		RunnableCommand = autoclass( 'net.imglib2.python.PythonCommandInfo$RunnableCommand' )
-		runnable = Runnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
-		command = RunnableCommand( runnable )
-		command_info = PythonCommandInfo( command )
+		RunnableCommand   = autoclass( 'net.imglib2.python.PythonCommandInfo$RunnableCommand' )
+		runnable          = Runnable( lambda : QtWidgets.QApplication.postEvent( widget, QtGui.QShowEvent() ) )
+		command           = RunnableCommand( runnable )
+		command_info      = PythonCommandInfo( command )
 
 		command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
 		ij.module().addModule( command_info )
