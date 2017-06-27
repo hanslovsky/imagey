@@ -2,7 +2,7 @@
 # should we assume that bash is there? does sh understand basic globbing?
 # PYJNIUS_JAR=$HOME/imglyb-jars/pyjnius.jar JAVA_HOME=/usr/lib/jvm/default USE_SYSTEM_PYTHON=1 ./imagey-starter.sh
 
-# set -e
+set -e
 
 PYTHON=python
 USER_JAVA_HOME=${JAVA_HOME}
@@ -48,7 +48,8 @@ if [ -z "${USE_SYSTEM_PYTHON}" ]; then
     # does not work
     CONDA_ENVS_INFO=$(${CONDA_CMD} info --envs)
     INFO_GREP_OPTS="-E '^\${FIJI_CONDA_ENVIRONMENT} +[*/]'"
-    ENV_EXIST_STRING=$( echo "$CONDA_ENVS_INFO" | grep -E "^${FIJI_CONDA_ENVIRONMENT} +[*/]" )
+    # { cmd || true; } avoids potential non-zero return code of cmd
+    ENV_EXIST_STRING=$( echo "$CONDA_ENVS_INFO" | { grep -E "^${FIJI_CONDA_ENVIRONMENT} +[*/]" || true; } )
     if [ -z "${ENV_EXIST_STRING}" ]; then
         # probably need to specify version for imglib2-imglyb
         CREATE_CMD="${CONDA_CMD} create \
