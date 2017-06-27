@@ -238,6 +238,8 @@ if __name__ == "__main__":
 		command_info.setMenuPath( MenuPath( "Plugins>Scripting>CPython REPL" ) )
 		ij.module().addModule( command_info )
 
+		SwingUtilities = autoclass( 'javax.swing.SwingUtilities' )
+
 
 
 		def open_imgs( path ):
@@ -270,7 +272,24 @@ if __name__ == "__main__":
 			title : str
 			Title of display.
 			"""
-			return display.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
+
+			status = [ False, None ]
+
+			def create_display( status ):
+				status[ 1 ] = display.createDisplay( title, imglyb.to_imglib( img ) if isinstance( img, ( np.ndarray, ) ) else img )
+				status[ 0 ] = True
+
+			SwingUtilities.invokeLater( Runnable( lambda : create_display( status ) ) )
+
+			def check_finished( status ):
+				while not status[ 0 ]:
+					time.sleep( 0.01 )
+
+			t = threading.Thread( target = lambda : check_finished( status ) )
+			t.start()
+			t.join()
+
+			return status[ 1 ]
 
 		widget.add_more_variables( ij=ij, factory=factory, opener=opener, display=display, open_imgs=open_imgs, open_img=open_img, show_img=show_img )
 
