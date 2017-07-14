@@ -41,6 +41,7 @@ if [ -z "${USE_SYSTEM_PYTHON}" ]; then
 
     CONDA_CMD="${CONDA_HOME}/bin/conda"
     ACTIVATE="${CONDA_HOME}/bin/activate"
+    DEACTIVATE="${CONDA_HOME}/bin/deactivate"
 
 
     # how to ignore ~/.conda?
@@ -75,6 +76,10 @@ if [ -z "${USE_SYSTEM_PYTHON}" ]; then
     done
 
     export JAVA_HOME="${USER_JAVA_HOME:-$JAVA_HOME}"
+
+    # restart environment to make sure all environment variables are set
+    source "${DEACTIVATE}" "${FIJI_CONDA_ENVIRONMENT}"
+    source "${ACTIVATE}" "${FIJI_CONDA_ENVIRONMENT}"
 
 fi
 
