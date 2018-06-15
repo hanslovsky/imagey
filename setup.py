@@ -3,7 +3,7 @@ from distutils.command.build_py import build_py
 
 setup(
     name='imagey',
-    version='0.1.1-dev',
+    version='0.1.1',
     author='Philipp Hanslovsky',
     author_email='hanslovskyp@janelia.hhmi.org',
     description='imagey launcher',
