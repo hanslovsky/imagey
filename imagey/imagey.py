@@ -245,7 +245,7 @@ def main():
         # This is only necessary because the command does not show in the menu anymore
         command.run()
 
-        def open_imgs( path, type ):
+        def open_imgs( path, t ):
             """Open all images at location specified by path.
 
             Parameters
@@ -253,9 +253,9 @@ def main():
             path : str
             Location of images.
             """
-            return opener.openImgs( path, factory.imgFactory( type ) )
+            return opener.openImgs( path, factory.imgFactory( t ) )
 
-        def open_img( path, type ):
+        def open_img( path, t ):
             """Open one image at location specified by path.
 
             Parameters
@@ -263,7 +263,7 @@ def main():
             path : str
             Location of image.
             """
-            return open_imgs( path, type ).get( 0 )
+            return open_imgs( path, t ).get( 0 )
 
         def show_img( img, title='' ):
             """Show image using DisplayService of current ImageJ instance.
