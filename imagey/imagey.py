@@ -129,12 +129,13 @@ def main():
     parser.add_argument( '--ij-opts', '-i', required=False, default='' )
 
     args = parser.parse_args()
+    args.fiji_dir = args.fiji_dir[0] if isinstance(args.fiji_dir, (list,tuple)) else args.fiji_dir
 
     from jnius_config import split_char
 
-    FIJI_JARS_DIR= '{}/jars'.format( args.fiji_dir )
-    FIJI_PLUGIN_DIR = '{}/plugins'.format( args.fiji_dir )
-    FIJI_JARS_BIOFORMATS_DIR = '{}/bio-formats'.format( FIJI_JARS_DIR )
+    FIJI_JARS_DIR= '{}{}jars'.format( args.fiji_dir, os.sep )
+    FIJI_PLUGIN_DIR = '{}{}plugins'.format( args.fiji_dir, os.sep )
+    FIJI_JARS_BIOFORMATS_DIR = '{}{}bio-formats'.format( FIJI_JARS_DIR, os.sep )
 
     try:
         JAVA_HOME = os.environ[ 'JAVA_HOME' ]
@@ -142,14 +143,14 @@ def main():
         print( 'JAVA_HOME not in environment' )
         raise e
 
-    javac = '{}/bin/javac'.format( JAVA_HOME )
+    javac = '{}{}bin{}javac'.format( JAVA_HOME, os.sep, os.sep )
                
     match_string = r'(imglib2-([0-9]|algorithm-[0-9])|bigdataviewer|imagej-legacy)'
     matcher = re.compile( match_string )
                
-    libs = [ jar for jar in sorted( glob.glob( '{}/*.jar'.format( FIJI_JARS_DIR ) ) ) if not matcher.search( jar ) ]
-    plugin_jars = [ jar for jar in sorted( glob.glob( '{}/*.jar'.format( FIJI_PLUGIN_DIR ) ) ) if not matcher.search( jar ) ]
-    bioformats_jars = [ jar for jar in sorted( glob.glob( '{}/*.jar'.format( FIJI_JARS_BIOFORMATS_DIR ) ) ) if not matcher.search( jar ) ]
+    libs = [ jar for jar in sorted( glob.glob( '{}{}*.jar'.format( FIJI_JARS_DIR, os.sep ) ) ) if not matcher.search( jar ) ]
+    plugin_jars = [ jar for jar in sorted( glob.glob( '{}{}*.jar'.format( FIJI_PLUGIN_DIR, os.sep ) ) ) if not matcher.search( jar ) ]
+    bioformats_jars = [ jar for jar in sorted( glob.glob( '{}{}*.jar'.format( FIJI_JARS_BIOFORMATS_DIR, os.sep ) ) ) if not matcher.search( jar ) ]
 
     
                
