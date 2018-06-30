@@ -1,4 +1,8 @@
 # imagey - ImageJ with CPython REPL
+**NOTE**: Currently, `legacy-imglib1-1.1.8.jar` cannot be on class path (see [#3](https://github.com/hanslovsky/imagey/issues/3)). This should make it work:
+```bash
+mv /path/to/Fiji.app/jars/legacy-imglib1-<VERSION>.jar{.bkp,}
+```
 
 This uses ImageJ2 because shared memory would not be possible with ImageJ1 `ImageProcessor` data structures.
 
