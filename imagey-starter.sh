@@ -52,7 +52,7 @@ if [ -z "${USE_SYSTEM_PYTHON}" ]; then
     # { cmd || true; } avoids potential non-zero return code of cmd
     ENV_EXIST_STRING=$( echo "$CONDA_ENVS_INFO" | { grep -E "^${FIJI_CONDA_ENVIRONMENT} +[*/]" || true; } )
     if [ -z "${ENV_EXIST_STRING}" ]; then
-        # probably need to specify version for imglib2-imglyb
+        # probably need to specify version for imglyb
         CREATE_CMD="${CONDA_CMD} create \
               -y \
               -n ${FIJI_CONDA_ENVIRONMENT} \
@@ -65,8 +65,8 @@ if [ -z "${USE_SYSTEM_PYTHON}" ]; then
     source "${ACTIVATE}" "${FIJI_CONDA_ENVIRONMENT}"
 
     INSTALLED_PACKAGES="$($CONDA_CMD list | grep -v '^#' | cut -d ' ' -f1)"
-    if [ -z "$(echo $INSTALLED_PACKAGES | grep imglib2-imglyb)" ]; then
-        $CONDA_CMD install -y -c hanslovsky imglib2-imglyb
+    if [ -z "$(echo $INSTALLED_PACKAGES | grep imglyb)" ]; then
+        $CONDA_CMD install -y -c conda-forge -c hanslovsky imglyb
     fi
 
     for CONDA_PACKAGE in pyqt qtconsole scikit-image matplotlib; do
